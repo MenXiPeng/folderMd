@@ -1,9 +1,9 @@
 import os, shutil, fnmatch
 import re
 from enum import Enum
-#path = "/Users/menxipeng/logs/电视剧"
+path = "/Users/menxipeng/logs/电视剧"
 
-path = input("请输入跟路径：")
+#path = input("请输入跟路径：")
 
 
 def is_root_folder(rootpath, pre_path):
@@ -31,8 +31,17 @@ def is_root_folder(rootpath, pre_path):
         # 文件处理
         if os.path.isfile(file_path) and contains_file(file_path):
             if not (file.startswith('.') and os.path.isfile(file_path)):
-                seasonFolder = file_handler(file_path, currentDir)
+                if contains_site(file_path):
+                    print("删除包含网址的广告文件：", file_path)
+                    os.remove(file_path)
+                else:
+                    file_handler(file_path, currentDir)
                 continue
+        else:
+            # 删除不是 mkv 的文件
+            if os.path.exists(file_path):
+                print("删除非 mkv 文件：", file_path)
+                os.remove(file_path)
         newName = match_folder(file)
         newPath = os.path.join(rootpath, newName)
         if os.path.exists(newPath) and os.path.exists(currentDir):
@@ -122,7 +131,8 @@ def modify_file_name(filename, season):
 
 
 def contains_site(file):
-    site = re.search("[a-zA-Z]{1,3}(\\.){1}[a-zA-Z]{1,}(\\.){1}[a-zA-Z]{1,3}", file, re.M)
+    # [a-zA-Z]{1,3}
+    site = re.search("(www)(\\.){1}[a-zA-Z]{1,}(\\.){1}[a-zA-Z]{1,3}", file, re.M)
     return site is not None
 
 
